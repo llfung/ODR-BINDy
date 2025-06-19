@@ -1,0 +1,11 @@
+function out = Polynomial3D2Od(X)
+    N = numel(X)/3;
+    X = reshape(X,N,3);
+    out = zeros(N,10,3);
+    out(:,:,1) = [zeros(N,1) ones(N,1) zeros(N,2)  ...
+        2*X(:,1) X(:,2) X(:,3) zeros(N,3)];
+    out(:,:,2) = [zeros(N,2) ones(N,1) zeros(N,1) ...
+        zeros(N,1) X(:,1) zeros(N,1) 2*X(:,2) X(:,3) zeros(N,1)];
+    out(:,:,3) = [zeros(N,3) ones(N,1) ...
+        zeros(N,2) X(:,1) zeros(N,1) X(:,2) 2*X(:,3)];
+end

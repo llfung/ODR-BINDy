@@ -1,0 +1,14 @@
+function out = Polynomial9D2O(X)
+N = numel(X)/9;
+X = reshape(X,N,9);
+   x1=X(:,1);
+   x2=X(:,2);
+   x3=X(:,3);
+   x4=X(:,4);
+   x5=X(:,5);
+   x6=X(:,6);
+   x7=X(:,7);
+   x8=X(:,8);
+   x9=X(:,9);
+out = [ones(N,1) x1 x2 x3 x4 x5 x6 x7 x8 x9 x1.^2 x1.*x2 x1.*x3 x1.*x4 x1.*x5 x1.*x6 x1.*x7 x1.*x8 x1.*x9 x2.^2 x2.*x3 x2.*x4 x2.*x5 x2.*x6 x2.*x7 x2.*x8 x2.*x9 x3.^2 x3.*x4 x3.*x5 x3.*x6 x3.*x7 x3.*x8 x3.*x9 x4.^2 x4.*x5 x4.*x6 x4.*x7 x4.*x8 x4.*x9 x5.^2 x5.*x6 x5.*x7 x5.*x8 x5.*x9 x6.^2 x6.*x7 x6.*x8 x6.*x9 x7.^2 x7.*x8 x7.*x9 x8.^2 x8.*x9 x9.^2 ];
+end
