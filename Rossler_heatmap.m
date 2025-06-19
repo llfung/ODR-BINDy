@@ -22,10 +22,10 @@ nTest1 = 128; % generate models nTest1 times for SINDy
 % polyorder = 3;
 polyorder = 2;
 
-% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)];
+% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)] (For poolDataLIST)
 usesine = 0;
 
-% Set the number of columns of x (is this redundant?)
+% Set the number of dimensions
 D = 3;
 
 %% hyperparameters
@@ -33,8 +33,7 @@ PparamV_ODR= 10^2;% Arbitrary large variance with zero mean for all coefficients
 SigmaY_ODR = 1e-2;
 ODR_int_pt = 6;
 
-%% Build library of nonlinear terms as functions
-
+%% Build library of nonlinear terms as functionss
 libs.M = 10;
 libs.Theta_fun = @(X)Polynomial3D2O(X);
 libs.dTheta_fun = @(X)Polynomial3D2Od(X);
@@ -46,9 +45,8 @@ libs.dddTheta_fun_f = @(X,p,mask)Polynomial3D2Oddd_f(X,p,mask);
 % generate synthetic Lorenz system data
 param.a = 0.2;
 param.b = 0.2;
-param.c = 5.7;% From Kaheman
+param.c = 5.7;
 x0 = [-6 5 0]';
-% n = length(x0); 
 
 % set common params
 tol_ode = 1e-10;         % set tolerance (abs and rel) of ode45
@@ -67,7 +65,6 @@ Xi_truth(4,:) = [     -1 ,       0 , param.c ]; % y(3)
 Xi_truth(7,:) = [      0 ,       0 ,       1 ]; % y(1) * y(3)
 
 % signal power for noise calculation
-% [~,~,x10,~] = lorenz(x0,dtL(1):dtL(1):10,tol_ode,ode_params);
 [~,x_]=ode89(@(t,x) rossler(t,x,param),dt:dt:tf,x0,options);
 
 signal_power = rms(x_(:));

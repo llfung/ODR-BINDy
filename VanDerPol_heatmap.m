@@ -18,20 +18,19 @@ tEndL = 1.0:1.0:12.0;
 nTest1 = 128; % generate models nTest1 times for SINDy
 
 %% Settings
-% MPJ Set highest polynomial order of the combinations of polynomials of the state vector
-% polyorder = 3;
+% Set highest polynomial order of the combinations of polynomials of the state vector
 polyorder = 3;
 
-% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)];
+% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)]  (For poolDataLIST)
 usesine = 0;
 
-% Set the number of columns of x (is this redundant?)
+% Set the number of dimensions
 D = 2;
 
 %% hyperparameters
 PparamV_ODR=10^2;% Arbitrary large variance with zero mean for all coefficients
 SigmaY_ODR = 1e-2;
-ODR_int_pt = 6;
+ODR_int_pt = 4;
 
 %% Build library of nonlinear terms as functions
 libs.M = 10;
@@ -43,9 +42,8 @@ libs.dddTheta_fun_f = @(X,p,mask)Polynomial2D3Oddd_f(X,p,mask);
 %% common parameters, true Lorenz system, signal power for noise calculation
 
 % generate synthetic Lorenz system data
-param.beta = 0.5; % From Kaheman
+param.beta = 2.5; 
 x0 = [-2 1]';
-% n = length(x0); 
 
 % set common params
 tol_ode = 1e-10;         % set tolerance (abs and rel) of ode45
@@ -63,7 +61,6 @@ Xi_truth( 3,2) = param.beta;
 Xi_truth( 8,2) = -param.beta;
 
 % signal power for noise calculation
-% [~,~,x10,~] = lorenz(x0,dtL(1):dtL(1):10,tol_ode,ode_params);
 [~,x_]=ode89(@(t,x) vanderpol(t,x,param),dt:dt:tf,x0,options);
 
 signal_power = rms(x_(:));

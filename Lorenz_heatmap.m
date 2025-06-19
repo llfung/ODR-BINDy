@@ -22,10 +22,10 @@ nTest1 = 128; % generate models nTest1 times for SINDy
 % polyorder = 3;
 polyorder = 2;
 
-% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)];
+% Set 1 to set yout = [yout sin(k*yin) cos(k*yin)]  (For poolDataLIST)
 usesine = 0;
 
-% Set the number of columns of x (is this redundant?)
+% Set the number of dimensions
 D = 3;
 
 %% hyperparameters
