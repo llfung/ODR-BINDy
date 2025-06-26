@@ -40,9 +40,9 @@ libs.dTheta_fun = @(X)Polynomial3D2Od(X);
 libs.ddTheta_fun = @(X)Polynomial3D2Odd(X);
 libs.dddTheta_fun_f = @(X,p,mask)Polynomial3D2Oddd_f(X,p,mask);
 
-%% common parameters, true Lorenz system, signal power for noise calculation
+%% common parameters, true Rossler system, signal power for noise calculation
 
-% generate synthetic Lorenz system data
+% generate synthetic Rossler system data
 param.a = 0.2;
 param.b = 0.2;
 param.c = 5.7;
@@ -54,9 +54,9 @@ options = odeset('RelTol',tol_ode,'AbsTol',tol_ode*ones(1,length(x0)));
 
 % time step
 dt = 0.05;
-tf = 25;
+tf = 30;
 
-% get true Lorenz system for comparison
+% get true Rossler system for comparison
 Xi_truth = zeros(libs.M ,D);
 Xi_truth(1,:) = [      0 ,       0 , param.b ];
 Xi_truth(2,:) = [      0 ,       1 ,       0 ]; % y(1)
@@ -67,12 +67,11 @@ Xi_truth(7,:) = [      0 ,       0 ,       1 ]; % y(1) * y(3)
 % signal power for noise calculation
 [~,x_]=ode89(@(t,x) rossler(t,x,param),dt:dt:tf,x0,options);
 
-signal_power = rms(x_(:));
+signal_power = std(x_(:));
 
-%% general parameters
-saveTrue = 0;
+%% Saving intermediary result
+saveTrue = 1;
 
-%% run
 %% Run the Loop
 % Initialisation
 nWrongTermsODR = zeros(length(epsL),length(tEndL),nTest1);
@@ -84,7 +83,7 @@ for ieps = 1:length(epsL)
     noise_ratio = epsL(ieps);
 
     for idt = 1:length(tEndL)
-%%
+        %% Iterate through each noise and data length
         noise_ratio= epsL(ieps);
         tEnd = tEndL(idt);
 
@@ -152,5 +151,5 @@ for ieps = 1:length(epsL)
     end
 end
 clearvars pc libs ans
-save('Full_Lorenz_SuccessRate_heatmap.mat','-v7.3');
+save('Full_Rossler_SuccessRate_heatmap.mat','-v7.3');
 return

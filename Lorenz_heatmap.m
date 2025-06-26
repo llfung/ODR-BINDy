@@ -55,10 +55,10 @@ sigma = 10;  % Lorenz's parameters (chaotic)
 beta = 8/3;
 rho = 28;
 x0 = [-8 8 27]';
-% n = length(x0); 
+
 
 % set common params
-tol_ode = 1e-10;         % set tolerance (abs and rel) of ode45
+tol_ode = 1e-10;         % set tolerance (abs and rel) of ode89
 options = odeset('RelTol',tol_ode,'AbsTol',tol_ode*ones(1,length(x0)));
 
 % time step
@@ -73,10 +73,9 @@ Xi_truth( 6,:) = [ 0      0  1];
 Xi_truth( 7,:) = [ 0     -1  0];
 
 % signal power for noise calculation
-% [~,~,x10,~] = lorenz(x0,dtL(1):dtL(1):10,tol_ode,ode_params);
 [~,x_]=ode89(@(t,x) lorenz(t,x,sigma,beta,rho),dt:dt:10,x0,options);
 
-signal_power = rms(x_(:));
+signal_power = std(x_(:));
 
 %% general parameters
 saveTrue = 0;

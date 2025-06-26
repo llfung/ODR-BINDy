@@ -39,21 +39,21 @@ libs.dTheta_fun = @(X)Polynomial2D3Od(X);
 libs.ddTheta_fun = @(X)Polynomial2D3Odd(X);
 libs.dddTheta_fun_f = @(X,p,mask)Polynomial2D3Oddd_f(X,p,mask);
 
-%% common parameters, true Lorenz system, signal power for noise calculation
+%% common parameters, true Van Der Pol system, signal power for noise calculation
 
-% generate synthetic Lorenz system data
-param.beta = 2.5; 
+% generate synthetic Van Der Pol system data
+param.beta = 0.5; 
 x0 = [-2 1]';
 
 % set common params
-tol_ode = 1e-10;         % set tolerance (abs and rel) of ode45
+tol_ode = 1e-10;         % set tolerance (abs and rel) of ode89
 options = odeset('RelTol',tol_ode,'AbsTol',tol_ode*ones(1,length(x0)));
 
 % time step
 dt = 0.01;
 tf = 12;
 
-% get true Lorenz system for comparison
+% get true Van Der Pol system for comparison
 Xi_truth = zeros(libs.M ,D);
 Xi_truth( 3,1) = 1;
 Xi_truth( 2,2) = -1;
@@ -63,9 +63,9 @@ Xi_truth( 8,2) = -param.beta;
 % signal power for noise calculation
 [~,x_]=ode89(@(t,x) vanderpol(t,x,param),dt:dt:tf,x0,options);
 
-signal_power = rms(x_(:));
+signal_power = std(x_(:));
 
-%% general parameters
+%% Saving intermediary result
 saveTrue = 1;
 
 %% Run the Loop

@@ -7,7 +7,7 @@ figpath = './figs/';
 addpath(genpath('./'));
 
 % Random Seed
-rng(129);
+rng(12);
 % Set highest polynomial order of the combinations of polynomials of the state vector
 % polyorder = 3;
 polyorder = 2;
@@ -40,8 +40,8 @@ poolDataLIST({'x','y','z'},Xi_truth,D,polyorder,usesine);
 %% generate Data
 x0= [-8,8,27];%[-1,6,15]; %=[2.6,5,8];  % Initial condition
 % Integrate in time using ode89
-t_final=10; %4 is better than 40?
-dt=t_final/1000;
+t_final=5;
+dt=0.01;
 tspan=dt:dt:t_final; % BINDy is best used in low data (can be lower than # of candidate func)
 N = length(tspan);
 
@@ -50,7 +50,7 @@ ODEoptions = odeset('RelTol',1e-12,'AbsTol',1e-12*ones(1,D));
 
 %% Compute Derivative and Add noise
 %  Set size of random noise
-eps_x = 16*0.2; %Linear method work as well when noise is >2.0
+eps_x = std(x_clean(:))*0.2; %Linear method work as well when noise is >2.0
 
 % Actual dx from clean data. For reference only
 dx_clean = NaN(length(x_clean),D);
@@ -105,136 +105,74 @@ toc
 
 return
 
-%% FIGURE 1:  LORENZ for T\in[0,20]
-savefig=false;
-tspan = [0 4];
-[tA,xA]=ode89(@(t,x)lorenz(t,x,sigma,beta,rho),tspan,x0,ODEoptions);   % true model
-[tO,xO]=ode89(@(t,x)sparseGalerkin(t,x,Xi_ODR,polyorder,usesine),tspan,x0,ODEoptions);  % SINDY approximate
+%% LORENZ for T
+savefig=true;
+tA = tspan;
+tO = tspan;
+xA = x_clean;
+xO = X_denoise;
 
-%%
-f1=figure('Position',[200,259,390,413]);
-% subplot(1,3,1)
-plot3(xA(:,1),xA(:,2),xA(:,3),'LineWidth',1.5);hold on;
-plot3(x(:,1),x(:,2),x(:,3),'x');
-view(27,16)
-grid on
-xlabel('x','FontSize',13)
-ylabel('y','FontSize',13)
-zlabel('z','FontSize',13)
-set(gca,'FontSize',13)
-% title('Orignal');
-legend('Truth','Data','Location','northeast');
-axis([-25 25 -35 35 0 60]);
-if savefig
-    saveas(f1,[figpath 'Lorenz_Theo_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.svg']);
-    saveas(f1,[figpath 'Lorenz_Theo_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.fig']);
-end
+%% Noise and DeNoise Visualisation
+hf=figure('Position',[100 100 1250 450]);
+a0=subplot(3,6,[1 2 7 8 13 14]);
 
-f4=figure('Position',[1247,259,390,413]);
-plot3(xO(:,1),xO(:,2),xO(:,3),'LineWidth',1.5); hold on;
-plot3(x(:,1),x(:,2),x(:,3),'x');
-view(27,16)
-grid on
-xlabel('x','FontSize',13)
-ylabel('y','FontSize',13)
-zlabel('z','FontSize',13)
-% title('SINDy');
-legend('ODR-BINDy','Location','northeast');
-set(gca,'FontSize',13)
+hold on;
+plot3(x(:,1),x(:,2),x(:,3),'rx:',LineWidth=0.5);
+plot3(x_clean(:,1),x_clean(:,2),x_clean(:,3),'k-',LineWidth=2.0);
+plot3(X_denoise(:,1),X_denoise(:,2),X_denoise(:,3),'--',...
+    LineWidth=1.5);
+view(27,16);
+grid on;
+set(gca,'TickDir','none','FontSize',12);
+% set(get(gca, 'XAxis'), 'Visible', 'off');
+% set(get(gca, 'YAxis'), 'Visible', 'off');
+% set(get(gca, 'ZAxis'), 'Visible', 'off');
+xlabel('$$x$$','Interpreter','latex','FontSize',14)
+ylabel('$$y$$','Interpreter','latex','FontSize',14)
+zlabel('$$z$$','Interpreter','latex','FontSize',14)
 axis([-25 25 -35 35 0 60])
-if savefig
-    saveas(f4,[figpath 'Lorenz_ODR-BINDy_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.svg']);
-    saveas(f4,[figpath 'Lorenz_ODR-BINDy_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.fig']);
-end
-%%
-% Lorenz for t=20, dynamo view
-f5=figure('Position',[100 100 1250 250]);
-subplot(1,12,[1 2 3]); hold on;
+legend('Data','Truth','ODR-BINDy','Location','northeast','FontSize',12);
+a0.Position=[0.04,0.130833333333333,0.3,0.794166666666666];
+
+%% Lorenz, dynamo view
+a1=subplot(3,6,[3 4 5 6]); hold on;
+plot(t,x(:,1),'rx');
 plot(tA,xA(:,1),'k-','LineWidth',2);
-plot(t,x(:,1),'kx');
 plot(tO,xO(:,1),'--','LineWidth',1.5)
 grid on;
-xlim(tspan)
-set(gca,'FontSize',14)
-xlabel('$$t$$','Interpreter','latex','FontSize',18)
-ylabel('$$x_1$$','Interpreter','latex','FontSize',18)
+xlim([tspan(1) tspan(end)])
+xticklabels({})
+set(gca,'FontSize',12)
+% xlabel('$$t$$','Interpreter','latex','FontSize',18)
+ylabel('$$x$$','Interpreter','latex','FontSize',14)
+a1.Position = [0.4,0.65,0.55,0.25];
 
-
-subplot(1,12,[5 6 7]); hold on;
+a2=subplot(3,6,[9 10 11 12]); hold on;
+plot(t,x(:,2),'rx');
 plot(tA,xA(:,2),'k-','LineWidth',2);
-plot(t,x(:,2),'kx');
 plot(tO,xO(:,2),'--','LineWidth',1.5)
 grid on;
-xlim(tspan)
-set(gca,'FontSize',14)
-xlabel('$$t$$','Interpreter','latex','FontSize',18)
-ylabel('$$x_2$$','Interpreter','latex','FontSize',18)
+xlim([tspan(1) tspan(end)])
+xticklabels({})
+set(gca,'FontSize',12)
+% xlabel('$$t$$','Interpreter','latex','FontSize',18)
+ylabel('$$y$$','Interpreter','latex','FontSize',14)
+a2.Position=[0.4,0.38,0.55,0.25];
 
-
-subplot(1,12,[9 10 11]); hold on;
+a3=subplot(3,6,[15 16 17 18]); hold on;
+plot(t,x(:,3),'rx');
 plot(tA,xA(:,3),'k-','LineWidth',2);
-plot(t,x(:,3),'kx');
 plot(tO,xO(:,3),'--','LineWidth',1.5)
 grid on;
-xlim(tspan)
-set(gca,'FontSize',14)
-xlabel('$$t$$','Interpreter','latex','FontSize',18)
-ylabel('$$x_3$$','Interpreter','latex','FontSize',18)
-legend('Truth','Data','ODR-BINDy','Position',[0.847629796839729 0.82 0.144894986231761 0.13782991202346]);
-% legend('Truth','Data','Bayesian-SINDy','Location','eastoutside');
+xlim([tspan(1) tspan(end)])
 
-% % Create textbox
-% annotation(f5,'textbox',...
-%     [0.0690067720090291 0.924630498533724 0.0420428893905192 0.0762463343108505],...
-%     'String',{'(a)'},...
-%     'LineStyle','none',...
-%     'FontSize',20,...
-%     'FontName','Times New Roman',...
-%     'FontAngle','italic');
-% 
-% % Create textbox
-% annotation(f5,'textbox',...
-%     [0.632212189616249 0.927563049853372 0.0414785553047404 0.0762463343108505],...
-%     'String',{'(c)'},...
-%     'LineStyle','none',...
-%     'FontSize',20,...
-%     'FontName','Times New Roman',...
-%     'FontAngle','italic');
-% 
-% % Create textbox
-% annotation(f5,'textbox',...
-%     [0.350045146726861 0.927563049853372 0.0420428893905192 0.0762463343108505],...
-%     'String',{'(b)'},...
-%     'LineStyle','none',...
-%     'FontSize',20,...
-%     'FontName','Times New Roman',...
-%     'FontAngle','italic');
-
+set(gca,'FontSize',12)
+xlabel('$$t$$','Interpreter','latex','FontSize',14)
+ylabel('$$z$$','Interpreter','latex','FontSize',14)
+a3.Position = [0.4,0.11,0.55,0.25];
+a3.YTick=0:20:60;
 if savefig
-    saveas(f5,[figpath 'Lorenz_dyn_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.svg']);
-    saveas(f5,[figpath 'Lorenz_dyn_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.fig']);
+    saveas(hf,[figpath 'Lorenz_dyn_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.svg']);
+    saveas(hf,[figpath 'Lorenz_dyn_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.eps']);
+    saveas(hf,[figpath 'Lorenz_dyn_eps' num2str(eps_x) '_dt' num2str(dt) '_tf' num2str(t_final) '.fig']);
 end
-%% Noise and DeNoise Visualisation
-hf=figure('Position',[10 10 250 350]);hold on;
-plot3(x(:,1),x(:,2),x(:,3),'r--',LineWidth=0.2);
-plot3(x_clean(:,1),x_clean(:,2),x_clean(:,3),'k-',LineWidth=3.0);
-view([391.185546875 15.41015625]);
-grid on;
-set(gca,'TickDir','none')
-set(get(gca, 'XAxis'), 'Visible', 'off');
-set(get(gca, 'YAxis'), 'Visible', 'off');
-set(get(gca, 'ZAxis'), 'Visible', 'off');
-axis([-20 20 -22.8 22 5 45]);
-
-
-hf2=figure('Position',[260 10 250 350]);hold on;
-plot3(x_clean(:,1),x_clean(:,2),x_clean(:,3),'k-',LineWidth=3.0);
-plot3(X_denoise(:,1),X_denoise(:,2),X_denoise(:,3),'--',...
-    LineWidth=2.0,Color=[0.0745098039215686 0.623529411764706 1]);
-view([391.185546875 15.41015625]);
-grid on;
-set(gca,'TickDir','none')
-set(get(gca, 'XAxis'), 'Visible', 'off');
-set(get(gca, 'YAxis'), 'Visible', 'off');
-set(get(gca, 'ZAxis'), 'Visible', 'off');
-axis([-20 20 -22.8 22 5 45]);
