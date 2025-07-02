@@ -39,7 +39,7 @@ poolDataLIST({'x','y','z'},Xi_truth,D,polyorder,usesine);
 %% generate Data
 x0= [-6 5 0];  % Initial condition
 % Integrate in time using ode89
-t_final=35;
+t_final=30;
 dt=0.05;
 tspan=dt:dt:t_final; % BINDy is best used in low data (can be lower than # of candidate func)
 N = length(tspan);
@@ -48,7 +48,7 @@ ODEoptions = odeset('RelTol',1e-12,'AbsTol',1e-12*ones(1,D));
 
 %% Compute Derivative and Add noise
 %  Set size of random noise
- eps_x = std(x_clean(:))*0.40; 
+ eps_x = std(x_clean(:))*0.1; 
 
 % Actual dx from clean data. For reference only
 dx_clean = NaN(length(x_clean),D);
@@ -85,8 +85,8 @@ TimeDiffObj.t = t;
 
 % Hyperparam: Noise standard deviation and prior standard deviation
 HyperObj.SigmaX = eps_x*ones(size(x));
-HyperObj.SigmaY = 1e-4*ones(size(IMat,1),D);
-HyperObj.SigmaP = 1e1*ones(Libs.M,3);
+HyperObj.SigmaY = 5e-3*ones(size(IMat,1),D);
+HyperObj.SigmaP = 5e1*ones(Libs.M,3);
 
 % Options (for plotting, output level, etc.)
 ODRopts.PlotXout = false;
@@ -98,6 +98,7 @@ tic
 disp('From Bayesian Regression (Greedy+ ODR)');
 poolDataLIST({'x','y','z'},Xi_ODR,D,polyorder,usesine);
 toc
+return
 
 %% ROSSLER for T
 savefig=true;

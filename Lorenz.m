@@ -79,7 +79,7 @@ elseif polyorder == 3
 end
 
 % FD object
-ODR_int_pt=4;
+ODR_int_pt=6;
 [IMat,DMat]=FD(N,ODR_int_pt,dt,false);
 TimeDiffObj.IMat = IMat;
 TimeDiffObj.DMat = DMat;
