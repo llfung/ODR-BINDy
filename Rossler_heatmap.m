@@ -29,8 +29,8 @@ usesine = 0;
 D = 3;
 
 %% hyperparameters
-PparamV_ODR= 10^2;% Arbitrary large variance with zero mean for all coefficients
-SigmaY_ODR = 1e-2;
+PparamV_ODR= 50^2;% Arbitrary large variance with zero mean for all coefficients
+SigmaY_ODR = 5e-3;
 ODR_int_pt = 6;
 
 %% Build library of nonlinear terms as functionss
@@ -61,7 +61,7 @@ Xi_truth = zeros(libs.M ,D);
 Xi_truth(1,:) = [      0 ,       0 , param.b ];
 Xi_truth(2,:) = [      0 ,       1 ,       0 ]; % y(1)
 Xi_truth(3,:) = [     -1 , param.a ,       0 ]; % y(2)
-Xi_truth(4,:) = [     -1 ,       0 , param.c ]; % y(3)
+Xi_truth(4,:) = [     -1 ,       0 ,-param.c ]; % y(3)
 Xi_truth(7,:) = [      0 ,       0 ,       1 ]; % y(1) * y(3)
 
 % signal power for noise calculation
@@ -102,10 +102,10 @@ for ieps = 1:length(epsL)
             VectorErrorODR_temp = zeros(nTest1,1);
             NoiseIDErrorODR_temp = zeros(nTest1,1);
         
-        parfor ii = 1:nTest1
+        for ii = 1:nTest1
             % set rnd number for randomness
-            rng("shuffle");
-
+            rng("default");
+            
             % add noise
             eps_x = noise_ratio*signal_power;
             noise = normrnd(0,eps_x,size(x_clean));
@@ -131,22 +131,30 @@ for ieps = 1:length(epsL)
                 [Xi_ODR,~,X_ODR]=ODR_BINDy_Greedy(x,libs,TimeDiffObj,HyperObj,ODRopts);
                 
                 %% store outputs
-                nWrongTermsODR_temp(ii) = sum(sum(abs((Xi_truth~=0) - (Xi_ODR~=0))));
-                modelErrorODR_temp(ii) = norm(Xi_ODR(:)-Xi_truth(:),'fro')/norm(Xi_truth(:),'fro');
-                successODR_temp(ii) = norm((Xi_truth~=0) - (Xi_ODR~=0))==0;
-                VectorErrorB_temp(ii) = sum((dx_clean-Theta_clean*Xi_ODR).^2,"all")/sum(dx_clean.^2,"all");
-                NoiseIDErrorODR_temp(ii) = sum(((X_ODR-x_clean)-noise).^2,"all");
+                if isempty(Xi_ODR)
+                    nWrongTermsODR_temp(ii) = NaN;
+                    modelErrorODR_temp(ii) = NaN;
+                    successODR_temp(ii) = 0;
+                    VectorErrorODR_temp(ii) = NaN;
+                    NoiseIDErrorODR_temp(ii) = NaN;
+                else
+                    nWrongTermsODR_temp(ii) = sum(sum(abs((Xi_truth~=0) - (Xi_ODR~=0))));
+                    modelErrorODR_temp(ii) = norm(Xi_ODR(:)-Xi_truth(:),'fro')/norm(Xi_truth(:),'fro');
+                    successODR_temp(ii) = norm((Xi_truth~=0) - (Xi_ODR~=0))==0;
+                    VectorErrorODR_temp(ii) = sum((dx_clean-Theta_clean*Xi_ODR).^2,"all")/sum(dx_clean.^2,"all");
+                    NoiseIDErrorODR_temp(ii) = sum(((X_ODR-x_clean)-noise).^2,"all");
+                end
         end
-        %% Store outputs
-            nWrongTermsODR(ieps,idt,:) = nWrongTermsODR_temp;
-            modelErrorODR(ieps,idt,:) = modelErrorODR_temp;
-            successODR(ieps,idt,:) = successODR_temp;
-            if saveTrue
-                iii=(ieps-1)*length(tEndL)+idt;
-                save([num2str(iii) '_Rossler_SuccessRate_heatmap.mat'],...
-                    "nWrongTermsODR_temp","modelErrorODR_temp",...
-                    "successODR_temp","VectorErrorB_temp","NoiseIDErrorODR_temp");
-            end
+        %% Store outputs (outer-loop)
+        nWrongTermsODR(ieps,idt,:) = nWrongTermsODR_temp;
+        modelErrorODR(ieps,idt,:) = modelErrorODR_temp;
+        successODR(ieps,idt,:) = successODR_temp;
+        if saveTrue
+            iii=(ieps-1)*length(tEndL)+idt;
+            save([num2str(iii) '_Rossler_SuccessRate_heatmap.mat'],...
+                "nWrongTermsODR_temp","modelErrorODR_temp",...
+                "successODR_temp","VectorErrorODR_temp","NoiseIDErrorODR_temp");
+        end
 
     end
 end
