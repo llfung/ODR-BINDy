@@ -1,4 +1,7 @@
 # ODR-BINDy
+
+[![DOI](https://zenodo.org/badge/1004831498.svg)](https://doi.org/10.5281/zenodo.16614237)
+
 Model discovery based on Bayesian Evidence (a.k.a. marginal likelihood) and nonlinear Orthogonal Distance Regression.
 
 ## Note on dependency and license
